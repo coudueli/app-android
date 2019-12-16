@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Proj942-App-EP</string>
+    <string name="title_activity_main">PROJ942-EP</string>
+
+    <string name="title_activity_photo_take">photoTakeActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="helloTxt">Bonjour monde !</string>
+    <string name="openCamera">Open Camera</string>
+    <string name="overlayTxt">Overlay for Camera</string>
+    <string name="takePhoto">Take !</string>
+</resources>
