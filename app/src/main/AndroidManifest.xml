@@ -34,8 +34,11 @@
             android:name=".photoTakeActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_photo_take"
-            android:theme="@style/FullscreenTheme" />
-        <activity android:name=".SendPhotoActivity"></activity>
+            android:theme="@style/FullscreenTheme"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".SendPhotoActivity"
+            android:screenOrientation="portrait"></activity>
     </application>
 
 </manifest>
