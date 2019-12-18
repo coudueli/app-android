@@ -2,6 +2,9 @@ package prospere.proj942_app_ep;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
@@ -108,6 +111,7 @@ public class    photoTakeActivity extends AppCompatActivity implements SurfaceHo
     private SurfaceView surfaceCamera;
     private Boolean isPreview;
     private static final int MY_PERMISSIONS_REQUEST_CAMERA = 1;
+    final String myTAG = "photoTakeActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -232,6 +236,8 @@ public class    photoTakeActivity extends AppCompatActivity implements SurfaceHo
         } catch (IOException e) {
         }
 
+        // Avant de lancer la preview: Mettre la caméra en mode portrait
+        camera.setDisplayOrientation(90);
         // Nous lançons la preview
         camera.startPreview();
 
@@ -275,6 +281,11 @@ public class    photoTakeActivity extends AppCompatActivity implements SurfaceHo
                 SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
     }
 
+    /**
+     * Méthode qui prépare le File où sera mis l'image finale
+     *
+     * @return
+     */
     private static File getOutputMediaFile() {
         // To be safe, you should check that the SDCard is mounted
         // using Environment.getExternalStorageState() before doing this.
@@ -293,6 +304,7 @@ public class    photoTakeActivity extends AppCompatActivity implements SurfaceHo
         }
 
         // Create a media file name
+        // Quel nom donner à l'image, où l'enregistrer.
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         File mediaFile;
         mediaFile = new File(mediaStorageDir.getPath() + File.separator +
@@ -302,26 +314,49 @@ public class    photoTakeActivity extends AppCompatActivity implements SurfaceHo
         return mediaFile;
     }
 
+    /**
+     * Classe (Camera.pictureCallback) qui est appellée quand la caméra viens de prendre
+     * et d'enregistrer une photo
+     */
     private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
 
+        /**
+         * Methode particulière de la classe qui est appellé quand la photo est prise et
+         * enregistrée
+         * @param data
+         * @param camera
+         */
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
 
+            // On prépare le File où sera mis l'image.
             File pictureFile = getOutputMediaFile();
+
+            // On récupère la photo elle-même (en Bitmap)
+            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+
+            // Rotate image 90 degree
+            Bitmap bOutput;
+            float degrees = 90;//rotation degree
+            Matrix matrix = new Matrix();
+            matrix.setRotate(degrees);
+            bOutput = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+
+
             if (pictureFile == null) {
-                //Log.d(TAG, "Error creating media file, check storage permissions");
+                Log.d(myTAG, "Error creating media file, check storage permissions");
                 return;
             }
 
             try {
+                // On enregistre l'image dans le File qu'on a fait plus tôt
                 FileOutputStream fos = new FileOutputStream(pictureFile);
-                fos.write(data);
+                bOutput.compress(Bitmap.CompressFormat.PNG, 100,fos);
                 fos.close();
-            }
-            catch (FileNotFoundException e) {
-                //Log.d(TAG, "File not found: " + e.getMessage());
+            } catch (FileNotFoundException e) {
+                Log.d(myTAG, "File not found: " + e.getMessage());
             } catch (IOException e) {
-                //Log.d(TAG, "Error accessing file: " + e.getMessage());
+                Log.d(myTAG, "Error accessing file: " + e.getMessage());
             }
             lastFile = pictureFile;
             launchSendPhotoActivity();
@@ -331,6 +366,7 @@ public class    photoTakeActivity extends AppCompatActivity implements SurfaceHo
         Intent i = new Intent(photoTakeActivity.this, SendPhotoActivity.class);
         i.putExtra("lastFile",lastFile.getPath());
         startActivity(i);
+        // On termine l'activité après avoir lancé la suivante.
         finish();
     }
 }
