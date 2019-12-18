@@ -12,9 +12,19 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Files;
 
 public class SendPhotoActivity extends AppCompatActivity {
     private ImageView imagePreview;
@@ -22,7 +32,7 @@ public class SendPhotoActivity extends AppCompatActivity {
     private File imageinView;
     private Button cancelBtn, sendBtn;
     private static final String TAG = "SendPhotoActivity";
-    private String url = "http://192.168.118.107/PROJ942/reception.php";
+    private String urlstr = "http://192.168.118.107/PROJ942/reception.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,8 +84,37 @@ public class SendPhotoActivity extends AppCompatActivity {
      * @param myFile
      * @param url
      */
-    public void sendFile(File myFile, String url){
+    public void sendFile(File myFile, String urladdr) {
+        URL url = OpenURL(urladdr);
+        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        try {
+            urlConnection.setDoOutput(true);
+            urlConnection.setChunkedStreamingMode(0);
+
+            OutputStream out = new BufferedOutputStream(urlConnection.getOutputStream());
+            out.write();
+
+            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+        } finally {
+            urlConnection.disconnect();
+        }
         // Send some File to url.
         //TODO: Do it.
+    }
+
+    private URL OpenURL(String urlstr) {
+        URL myURL = null;
+        try {
+            myURL = new URL(urlstr);
+            HttpURLConnection urlConnection = (HttpURLConnection) myURL.openConnection();
+            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+        } catch (MalformedURLException e) {
+            Toast.makeText(getApplicationContext(), "Malformed URL.", Toast.LENGTH_LONG);
+            e.printStackTrace();
+        } catch (IOException e) {
+            Toast.makeText(getApplicationContext(), "Could not read/open connection.", Toast.LENGTH_LONG);
+            e.printStackTrace();
+        }
+        return myURL;
     }
 }
