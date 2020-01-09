@@ -14,6 +14,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,6 +37,7 @@ public class SendPhotoActivity extends AppCompatActivity {
     private String imageInViewPath;
     private File imageinView;
     private Button cancelBtn, sendBtn;
+    private ProgressBar spinner;
     private static final String TAG = "SendPhotoActivity";
     private String urlstr = "http://192.168.118.106/PROJ942/reception.php";
     TextView messageText;
@@ -48,6 +51,7 @@ public class SendPhotoActivity extends AppCompatActivity {
         imagePreview = findViewById(R.id.previewPane);
         imageInViewPath = getIntent().getExtras().getString("lastFile");
         imageinView = new File(imageInViewPath);
+        spinner = findViewById(R.id.sendSpinner);
         showPicture(imageInViewPath, imagePreview);
 
         cancelBtn = findViewById(R.id.btnCancel);
@@ -67,7 +71,9 @@ public class SendPhotoActivity extends AppCompatActivity {
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                spinner.setVisibility(View.VISIBLE);
                 sendFile(new File(imageInViewPath), urlstr);
+                spinner.setVisibility(View.INVISIBLE);
             }
         });
     }
@@ -94,7 +100,6 @@ public class SendPhotoActivity extends AppCompatActivity {
 
         FileUploader fu = new FileUploader(myFile, urladdr, this);
         fu.run();
-
     }
 
 

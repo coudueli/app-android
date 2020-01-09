@@ -17,6 +17,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.ProgressBar;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -83,6 +84,7 @@ public class    photoTakeActivity extends AppCompatActivity implements SurfaceHo
         }
     };
     private boolean mVisible;
+    private ProgressBar spinner;
 
     public File lastFile;
     private final Runnable mHideRunnable = new Runnable() {
@@ -123,6 +125,7 @@ public class    photoTakeActivity extends AppCompatActivity implements SurfaceHo
         mContentView = findViewById(R.id.surfacePhoto); //surface preview de la photo
         takePhotoBtn = findViewById(R.id.takePhoto); //bouton photo
         surfaceCamera = (SurfaceView) mContentView;
+        spinner = findViewById(R.id.TakeSpinner);
 
 
         // Set up the user interaction to manually show or hide the system UI.
@@ -136,6 +139,7 @@ public class    photoTakeActivity extends AppCompatActivity implements SurfaceHo
         takePhotoBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                spinner.setVisibility(View.VISIBLE);
                 camera.takePicture(null,null,mPicture);
             }
         });

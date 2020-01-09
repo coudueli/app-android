@@ -1,24 +1,29 @@
 package prospere.proj942_app_ep;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.os.StrictMode;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.util.UUID;
 
+import org.apache.commons.io.IOUtils;
+
 /**
  * Classe dont le seul objectif est d'uploader le fichier qu'on lui passe dans son constructeur
- * TODO: A deplacer ailleurs / cleanup
  */
 public class FileUploader implements Runnable {
 
@@ -46,23 +51,23 @@ public class FileUploader implements Runnable {
     private void uploadFile() {
         // Le code de réponse HTML
         int respCode = 0;
-
+        DataInputStream response = null;
+        HttpURLConnection connection = null;
         try {
             // On initialise une nouvelle URL et une nouvelle connexion
             URL url = new URL(urlToUploadTo);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection = (HttpURLConnection) url.openConnection();
 
             // On prépare la requête POST
             connection.setRequestMethod("POST");
             connection.setDoOutput(true); // On dit qu'on va écrire dans la connexion
             // Un "Content-Type: multipart/" doit avoir une delimitation entre les différentes parties
-            // La délimitation est une chaine de caractère que l'on prends au hasard.
+            // La délimitation est une chaine de caractères que l'on prend au hasard.
             String boundary = UUID.randomUUID().toString();
             connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
 
             // On prépare l'entrée de la connexion
             DataOutputStream request = new DataOutputStream(connection.getOutputStream());
-
             request.writeBytes("--" + boundary + "\r\n");
             request.writeBytes("Content-Disposition: form-data; name=\"monfichier\"; filename=\"" + fileToUpload.getName() + "\"\r\n\r\n");
 
@@ -114,6 +119,22 @@ public class FileUploader implements Runnable {
                 Log.e(TAG, "Got Something OTHER than 200");
                 //do something sensible
         }
+        StringWriter writer = new StringWriter();
+        try {
+            response = new DataInputStream(connection.getInputStream());
+            IOUtils.copy(response, writer, "UTF-8");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NullPointerException e) {
+            Log.e(TAG, "Oups.");
+            e.printStackTrace();
+        }
+        String theString = writer.toString();
+        Log.i(TAG, theString);
+        AlertDialog.Builder builder = new AlertDialog.Builder(caller);
+        builder.setMessage(theString)
+                .setTitle("Send Result")
+                .show();
     } // End else block
 
     @Override
